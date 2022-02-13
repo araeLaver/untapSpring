@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+
+<!--
+	<security:http auto-config="true" use-expressions="false">
+		<security:intercept-url pattern="/sample/userPage" access="ROLE_MEMBER"/>
+		<security:intercept-url pattern="/sample/puserPage" access="ROLE_MANAGER"/>
+		<security:intercept-url pattern="/sample/adminPage" access="ROLE_ADMIN"/>
+	</security:http>
+-->
+
+	<bean id="customAccessDenied" class="org.zerock.security.CustomAccessDeniedHandler"></bean>
+	<bean id="customLoginSuccess" class="org.zerock.security.CustomLoginSuccessHandler"></bean>
+<!-- 	<bean id="customPasswordEncoder" class="org.zerock.security.CustomNoOpPasswordEncoder"></bean> -->
+	<bean id="bcryptPasswordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
+	<bean id="customUserDetailsService" class="org.zerock.security.CustomUserDetailsService"></bean>
+
+	<security:http>
+		<security:intercept-url pattern="/sample/all" access="permitAll" />
+		<security:intercept-url pattern="/sample/member" access="hasRole('ROLE_MEMBER')" />
+		<security:intercept-url pattern="/sample/admin" access="hasRole('ROLE_ADMIN')" />
+		<security:form-login/>
+		<!--
+			인터페이스의 구현체를 지정하거나 error-page를 지정할 수 있습니다.
+			'/accessError'라는 URI로 접근 제한 시 보이는 화면을 처리한다.
+		-->
+		<!--
+		<security:access-denied-handler error-page="/accessError"/>
+		-->
+		<!--
+		<security:csrf disabled="true"/>
+		-->
+		<security:access-denied-handler ref="customAccessDenied" />
+		<security:form-login login-page="/customLogin" authentication-success-handler-ref="customLoginSuccess" />
+		<security:logout logout-url="/customLogout" invalidate-session="true" />
+		<security:logout logout-url="/customLogout" invalidate-session="true" delete-cookies="remember-me,JSESSION_ID" />
+		<security:remember-me data-source-ref="dataSource" token-validity-seconds="604800" />
+	</security:http>
+
+
+
+<!--
+	<security:authentication-manager>
+		<security:authentication-provider>
+			<security:user-service>
+				<security:user name="member" password="{noop}member" authorities="ROLE_MEMBER"/>
+				<security:user name="admin" password="{noop}admin" authorities="ROLE_MEMBER, ROLE_ADMIN"/>
+			</security:user-service>
+		</security:authentication-provider>
+	</security:authentication-manager>
+-->
+
+
+
+<!-- 		<security:authentication-manager>
+			<security:authentication-provider>
+				<security:jdbc-user-service data-source-ref="dataSource" />
+				<security:password-encoder ref="customPasswordEncoder" />
+			</security:authentication-provider>
+		</security:authentication-manager> -->
+
+	<security:authentication-manager>
+		<security:authentication-provider user-service-ref="customUserDetailsService">
+			<security:password-encoder ref="bcryptPasswordEncoder" />
+		</security:authentication-provider>
+	</security:authentication-manager>
+
+</beans>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+
+	<!-- Root Context: defines shared resources visible to all other web components -->
+
+
+	<bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
+
+<!--
+		<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"></property>
+		<property name="jdbcUrl" value="jdbc:oracle:thin:@localhost:1521:XE"></property>
+-->
+
+
+		<property name="driverClassName" value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy"></property>
+		<property name="jdbcUrl" value="jdbc:log4jdbc:oracle:thin:@localhost:1521:XE"></property>
+
+
+		<property name="username" value="book_ex"></property>
+		<property name="password" value="book_ex"></property>
+	</bean>
+
+	<!-- HikariCP configuration -->
+	<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
+		<constructor-arg ref="hikariConfig" />
+	</bean>
+
+
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+
+
+ 	<mybatis-spring:scan	base-package="org.zerock.mapper" />
+
+
+
+
+<!--
+	root-context.xml은 스프링이 로딩되면서 읽어 들이는 문서이므로, 주로 이미 만들어진 클래스들을 이용해서 스프링의 Bean으로 등록할때
+	사용된다. 일반적인 상황이라면 프로젝트에 직접 작성하는 클래스들은  어노테이션을 이용하는 경우가 많고, 외부 jar 파일 등으로 사용하는
+	클래스들은 <bean> 태그를 이용해서 작성하는 경우가 대부분 이다.
+ -->
+
+
+<!--
+	스프링은 클래스에서 객체를 생성하고 객체들의 의존성에 대한 처리 작업까지 내부에서 모든 것이 처리
+	스프링에서 관리되는 객체를 Bean, 이에 대한 설정은 XML과 Java를 이용해서 처리할 수 있다.
+	스프링 프레임워크에서 관리해야하는 객체(Bean)를 설정하는 설정파일 -> root-context.xml
+-->
+
+<!--
+	스프링이 시작되면 스프링이 사용하는 메모리 영역을 만들게 되는데, 이를 Context라고 한다.
+	스프링에서는 ApplicationContext라는 이름의 객체가 만들어 진다.
+	스프링은 자신이 객체를 생성하고 관리해야하는 객체들에 대한 설정이 필요하다.
+	이에 대한 설정이 root-context.xml 파일이다.
+
+	context:component-scan / 패키지 스캔 시작
+	@Component / 클래스의 인터스턴스를 생성
+
+	Restaurant 객체는 Chef 객체가 필요하다는 @Autowired 설징이 있으므로, 스프링은
+	Chef 객체의 레퍼런스를 Restaurant 객체에 주입한다.
+-->
+
+	<context:component-scan base-package = "org.zerock.sample"></context:component-scan>
+</beans>
